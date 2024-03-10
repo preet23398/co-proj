@@ -119,15 +119,27 @@ def Stype(instruction):
         print(i, end='')
 
 
+file = open('test.txt','r')
 
-instruction = 'jalr ra,a5,-07'
-instructionList = instruction.split()
-whichInstruction = instructionList[0]
+for line in file:
+    print(line.strip())
+    Line = line.strip()
+
+    instruction = Line
+    instructionList = instruction.split()
+    whichInstruction = instructionList[0]
 
 
-if whichInstruction == 'sw':
-    Stype(instruction)
-elif whichInstruction == 'lw' or whichInstruction == 'addi' or whichInstruction == 'sltiu' or whichInstruction == 'jalr':
-    Itype(instruction)
-else:
-    print('no such instruction exists')
+    if whichInstruction == 'sw':
+        Stype(instruction)
+        print(end='\n')
+        finalList.clear()
+    elif whichInstruction == 'lw' or whichInstruction == 'addi' or whichInstruction == 'sltiu' or whichInstruction == 'jalr':
+        Itype(instruction)
+        print(end='\n')
+        finalList.clear()
+    else:
+        print('no such instruction exists')
+
+    print(end='\n')
+
