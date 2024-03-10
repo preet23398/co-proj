@@ -1,0 +1,5 @@
+lw t2,100(sp)
+sw t5,200(gp)
+sltiu s5,a2,10
+addi s6,s7,25
+beq zero,zero,0
