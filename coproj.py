@@ -1,16 +1,50 @@
-opcodeList = ['0000011', '0010011', '0010011', '1100111','0100011']
-registers = {'ra':'00001', 'sp':'00010', 'gp':'00011', 'tp':'00100', 't0':'00101', 't1':'00110', 't2':'00111', 't3':'11100', 't4':'11101', 't5':'11110', 't6':'11111', 's0':'01000', 's2':'10010', 's3':'10011', 's4':'10100', 's5' : '10101', 's6':'10110', 's7':'10111', 's8':'11000', 's9':'11001', 's10':'11010', 's11':'11011', 'fp':'01000', 'a0':'01010', 'a1':'01011', 'a2':'01100', 'a3':'01101', 'a4':'01110', 'a5':'01111', 'a6':'10000', 'a7':'10001'}
-finalList = []
+
+def In():
+    with open("input.txt", "r") as file:
+        lines = file.readlines()
+        b=lines
+        #b=["lui a1,2048"]
+    for line in lines:
+        a=line.split(" ")
+    return a,b
+a,lines=In()
+
 
 def decimal_to_binary(decimal,num_bits):
-    decimal = int(decimal)
-    if decimal >= 0:
-        binary = bin(decimal)[2:].zfill(num_bits)
-    else:
-        positive_binary = bin(abs(decimal))[2:].zfill(num_bits)
-        inverted = ''.join('1' if bit == '0' else '0' for bit in positive_binary)
-        binary = bin(int(inverted, 2) + 1)[2:].zfill(num_bits)
-    return binary
+        decimal = int(decimal)
+        if decimal >= 0:
+            binary = bin(decimal)[2:].zfill(num_bits)
+        else:
+            positive_binary = bin(abs(decimal))[2:].zfill(num_bits)
+            inverted = ''.join('1' if bit == '0' else '0' for bit in positive_binary)
+            binary = bin(int(inverted, 2) + 1)[2:].zfill(num_bits)
+        return binary
+def U_type(instruction):
+    temp=a[1].split(',')
+    rd = registers.get(temp[0])
+    opcode=opcodemap.get(a[0])
+    imm = int(temp[1])
+    immbinary = decimal_to_binary(imm, 20)
+    value =   immbinary[-1::-1] + rd +opcode
+    return value
+
+def assembleinstruction(instruction):
+    mnemonic = a[0]
+    opcode = opcodemap.get(mnemonic)
+    temp=a[1].split(",")
+
+    rs1, rs2 = registers.get(temp[0]), registers.get(temp[1])
+    imm = int(temp[2])
+        
+    function = functionmap.get(mnemonic)        
+    immbinary = decimal_to_binary(imm, 12)
+    imm_high = immbinary[0] + immbinary[2:8]
+    imm_low = immbinary[8:] 
+    binaryinstruction =     imm_high+rs2+rs1+'0'  +function+ imm_low + opcode
+    return binaryinstruction
+
+
+
 
 def Itype(instruction):
 
@@ -18,7 +52,7 @@ def Itype(instruction):
     instructionList = instructionList1[1]
     instructionList2 = instructionList.split(',')
 
-    whichInstruction = instructionList1[0]
+    whichInstruction = a[0]
 
     if whichInstruction == 'lw':
         opcode = opcodeList[0]
@@ -80,8 +114,12 @@ def Itype(instruction):
     finalList.append(function)
     finalList.append(codeOfdestinationReg)
     finalList.append(opcode)
-    #for i in finalList:
-        #print(i, end='')
+    temp=''
+    for i in finalList:
+        temp+=i
+    with open("output.txt", "w") as output_file:
+        
+            output_file.write(temp)
 
 def Stype(instruction):
 
@@ -89,7 +127,6 @@ def Stype(instruction):
     instructionList = instructionList1[1]
     instructionList2 = instructionList.split(',')
 
-    whichInstruction = instructionList1[0]
 
     opcode = opcodeList[4]
 
@@ -115,69 +152,95 @@ def Stype(instruction):
     finalList.append(function)
     finalList.append(immediate_val2)
     finalList.append(opcode)
-    #for i in finalList:
-        #print(i, end='')
-
-input_file = input('enter the input file name: ')
-output_file = input('enter the output file name: ')
-
-file = open(input_file,'r')
-file2 = open(output_file,'w')
-
-for line in file:
-    print(line.strip())
-    Line = line.strip()
-
-    instruction = Line
-    instructionList = instruction.split()
-    whichInstruction = instructionList[0]
-
-
-    if whichInstruction == 'sw':
-        Stype(instruction)
-        print(end='\n')
-    elif whichInstruction == 'lw' or whichInstruction == 'addi' or whichInstruction == 'sltiu' or whichInstruction == 'jalr':
-        Itype(instruction)
-        print(end='\n')
-    else:
-        print('no such instruction exists')
-
+    temp=''
     for i in finalList:
-        file2.write(i)
-    file2.write('\n')
-
-    
-    finalList.clear()
-
-    print(end='\n')
-file.close()
-file2.close()
-
-
-def store_words_in_lists():
-    all_lines_numbers = []  
-
-    replacements = {
-        def store_words_in_lists():
-    all_lines_numbers = []  
-
-    replacements = {
-        "add": "0110011","sub": "0110011","sll": "0010011","slt": "0110011","sltu": "0110011","xor": "0110011","srl": "0110011", "or": "0110011", "and": "0110011",
-        "zero": "00000","ra": "00001","sp": "00010","gp": "00011","tp": "00100","t0": "00101","t1": "00110","t2": "00111","s0": "01000","fp": "01000","s1": "01001",
-        "a0": "01010","a1": "01011","a2": "01100","a3": "01101","a4": "01110","a5": "01111","a6": "10000","a7": "10001","s2": "10010","s3": "10011","s4": "10100","s5": "10101",
-        "s6": "10110","s7": "10111","s8": "11000","s9": "11001", "s10": "11010","s11": "11011","t3": "11100","t4": "11101","t5": "11110", "t6": "11111","zero,": "00000",
-        "ra,": "00001","sp,": "00010","gp,": "00011","tp,": "00100","t0,": "00101","t1,": "00110","t2,": "00111","s0,": "01000","fp,": "01000","s1,": "01001","a0,": "01010","a1,": "01011",
-        "a2,": "01100","a3,": "01101","a4,": "01110","a5,": "01111","a6,": "10000","a7,": "10001","s2,": "10010","s3,": "10011","s4,": "10100","s5,": "10101","s6,": "10110","s7,": "10111",
-        "s8,": "11000","s9,": "11001","s10,": "11010","s11,": "11011","t3,": "11100","t4,": "11101","t5,": "11110","t6,": "11111",
-    }
-
-    
-
-    # Read input from a text file
-    with open("input.txt", "r") as file:
-        lines = file.readlines()
+        temp+=i
+    with open("output.txt", "w") as output_file:
         
-        for line in lines:
+            output_file.write(temp)
+    
+
+
+if a[0]== 'add' or a[0]== 'sub' or a[0]== 'sll' or a[0]== 'slt' or a[0] == 'sltu' or a[0]== 'xor' or a[0]== 'srl' or a[0]== 'and'  or a[0]== 'or':
+    all_lines_numbers = []  
+    replacements = {
+        "add": "0110011",
+        "sub": "0110011",
+        "sll": "0010011",
+        "slt": "0110011",
+        "sltu": "0110011",
+        "xor": "0110011",
+        "srl": "0110011",
+        "or": "0110011",
+        "and": "0110011",
+        "zero": "00000",
+        "ra": "00001",
+        "sp": "00010",
+        "gp": "00011",
+        "tp": "00100",
+        "t0": "00101",
+        "t1": "00110",
+        "t2": "00111",
+        "s0": "01000",
+        "fp": "01000",
+        "s1": "01001",
+        "a0": "01010",
+        "a1": "01011",
+        "a2": "01100",
+        "a3": "01101",
+        "a4": "01110",
+        "a5": "01111",
+        "a6": "10000",
+        "a7": "10001",
+        "s2": "10010",
+        "s3": "10011",
+        "s4": "10100",
+        "s5": "10101",
+        "s6": "10110",
+        "s7": "10111",
+        "s8": "11000",
+        "s9": "11001",
+        "s10": "11010",
+        "s11": "11011",
+        "t3": "11100",
+        "t4": "11101",
+        "t5": "11110",
+        "t6": "11111",
+        "zero,": "00000",
+        "ra,": "00001",
+        "sp,": "00010",
+        "gp,": "00011",
+        "tp,": "00100",
+        "t0,": "00101",
+        "t1,": "00110",
+        "t2,": "00111",
+        "s0,": "01000",
+        "fp,": "01000",
+        "s1,": "01001",
+        "a0,": "01010",
+        "a1,": "01011",
+        "a2,": "01100",
+        "a3,": "01101",
+        "a4,": "01110",
+        "a5,": "01111",
+        "a6,": "10000",
+        "a7,": "10001",
+        "s2,": "10010",
+        "s3,": "10011",
+        "s4,": "10100",
+        "s5,": "10101",
+        "s6,": "10110",
+        "s7,": "10111",
+        "s8,": "11000",
+        "s9,": "11001",
+        "s10,": "11010",
+        "s11,": "11011",
+        "t3,": "11100",
+        "t4,": "11101",
+        "t5,": "11110",
+        "t6,": "11111",
+    }
+    for line in lines:
             line = line.strip()  # Remove leading/trailing whitespaces
             if line.lower() == 'done':
                 break
@@ -245,19 +308,50 @@ def store_words_in_lists():
 
             # Concatenate the numbers for this line into a single string and add to the list
             all_lines_numbers.append("".join(line_numbers))
-
-    # Write output to a text file
     final= ("".join(line_numbers[::-1]))
     with open("output.txt", "w") as output_file:
         
             output_file.write(final + "\n")
 
-def main():
-    store_words_in_lists()
 
-if __name__ == "__main__":
-    main()
-opcodemap = {
+elif a[0]== 'sw':
+    opcodeList = ['0000011', '0010011', '0010011', '1100111','0100011']
+    registers = {'ra':'00001', 'sp':'00010', 'gp':'00011', 'tp':'00100', 't0':'00101', 't1':'00110', 't2':'00111', 't3':'11100', 't4':'11101', 't5':'11110', 't6':'11111', 's0':'01000', 's1':'01001','s2':'10010', 's3':'10011', 's4':'10100', 's5' : '10101', 's6':'10110', 's7':'10111', 's8':'11000', 's9':'11001', 's10':'11010', 's11':'11011', 'fp':'01000', 'a0':'01010', 'a1':'01011', 'a2':'01100', 'a3':'01101', 'a4':'01110', 'a5':'01111', 'a6':'10000', 'a7':'10001'}
+    finalList = []
+    instruction = lines[0].strip()
+    instructionList=instruction.split()
+    def decimal_to_binary(decimal,num_bits):
+        decimal = int(decimal)
+        if decimal >= 0:
+            binary = bin(decimal)[2:].zfill(num_bits)
+        else:
+            positive_binary = bin(abs(decimal))[2:].zfill(num_bits)
+            inverted = ''.join('1' if bit == '0' else '0' for bit in positive_binary)
+            binary = bin(int(inverted, 2) + 1)[2:].zfill(num_bits)
+        return binary
+    Stype(instruction)
+    print(end='\n')
+elif a[0]=="lw" or a[0]=="addi" or a[0]=="sltiu" or a[0]=="jalr":
+    opcodeList = ['0000011', '0010011', '0010011', '1100111','0100011']
+    registers = {'ra':'00001', 'sp':'00010', 'gp':'00011', 'tp':'00100', 't0':'00101', 't1':'00110', 't2':'00111', 't3':'11100', 't4':'11101', 't5':'11110', 't6':'11111', 's0':'01000', 's2':'10010', 's3':'10011', 's4':'10100', 's5' : '10101', 's6':'10110', 's7':'10111', 's8':'11000', 's9':'11001', 's10':'11010', 's11':'11011', 'fp':'01000', 'a0':'01010', 'a1':'01011', 'a2':'01100', 'a3':'01101', 'a4':'01110', 'a5':'01111', 'a6':'10000', 'a7':'10001'}
+    finalList = []
+    instruction = lines[0].strip()
+    instructionList=instruction.split()
+    def decimal_to_binary(decimal,num_bits):
+        decimal = int(decimal)
+        if decimal >= 0:
+            binary = bin(decimal)[2:].zfill(num_bits)
+        else:
+            positive_binary = bin(abs(decimal))[2:].zfill(num_bits)
+            inverted = ''.join('1' if bit == '0' else '0' for bit in positive_binary)
+            binary = bin(int(inverted, 2) + 1)[2:].zfill(num_bits)
+        return binary
+    Itype(instruction)
+    print(end='\n')
+
+elif a[0]=="beq" or a[0]=="bne" or a[0]=="blt" or a[0]=="bge" or a[0]=="bltu" or a[0]=="bgeu":
+    registers = {'ra':'00001', 'sp':'00010', 'gp':'00011', 'tp':'00100', 't0':'00101', 't1':'00110', 't2':'00111', 't3':'11100', 't4':'11101', 't5':'11110', 't6':'11111', 's0':'01000', 's1':'01001','s2':'10010', 's3':'10011', 's4':'10100', 's5' : '10101', 's6':'10110', 's7':'10111', 's8':'11000', 's9':'11001', 's10':'11010', 's11':'11011', 'fp':'01000', 'a0':'01010', 'a1':'01011', 'a2':'01100', 'a3':'01101', 'a4':'01110', 'a5':'01111', 'a6':'10000', 'a7':'10001'}
+    opcodemap = {
     "beq": "1100011",
     "bne": "1100011",
     "blt": "1100011",
@@ -266,165 +360,54 @@ opcodemap = {
     "bgeu": "1100011",
     "auipc": "0010111",
     "lui": "0110111"
-}
-
-functionmap = {
-    "beq": "000",
-    "bne": "001",
-    "blt": "100",
-    "bge": "101",
-    "bltu": "110",
-    "bgeu": "111"
-}
-
-def decimaltobinary(num, width):
-    return format(num, '0' + str(width) + 'b')
-
-def assembleinstruction(instruction):
-    parts = instruction.replace(",", " ").split()
-    mnemonic = parts[0]
-    opcode = opcodemap.get(mnemonic)
-    
-    if opcode is None:
-        return None, "Unknown opcode"
-    
-    if mnemonic in ["beq", "bne", "blt", "bge", "bltu", "bgeu"]:
-        if len(parts) != 4:
-            return None, "Invalid instruction format"
-        rs1, rs2 = parts[1][1:], parts[2][1:]
-        try:
-            imm = int(parts[3])
-        except ValueError:
-            return None, "Invalid immediate value"
-        
-        function = functionmap.get(mnemonic)
-        
-        if function is None:
-            return None, "Invalid instruction format"
-        
-        immbinary = decimaltobinary(imm, 12)
-        binaryinstruction = opcode + immbinary[0] + immbinary[2:] + decimaltobinary(int(rs2), 5) + decimaltobinary(int(rs1), 5) + function
-        return binaryinstruction, None
-        
-    elif mnemonic in ["auipc", "lui"]:
-        if len(parts) != 3:
-            return None, "Invalid instruction format"
-        rd = parts[1][1:]
-        try:
-            imm = int(parts[2])
-        except ValueError:
-            return None, "Invalid immediate value"
-        
-        immbinary = decimaltobinary(imm, 20)
-        binaryinstruction = opcode + immbinary[:12] + decimaltobinary(int(rd), 5)
-        return binaryinstruction, None
-    
-    else:
-        return None, "Invalid instruction"
-
-def main():
-    inputfile = input("Enter the input file name: ")
-    outputfile = input("Enter the output file name: ")
-
-    try:
-        with open(inputfile, 'r') as file:
-            lines = file.readlines()
-    except FileNotFoundError:
-        print("Error: Input file not found")
-        return
-
-    binaryinstructions = []
-    for line in lines:
-        line = line.strip()
-        if not line:
-            continue
-        binaryinstr, error = assembleinstruction(line)
-        if error:
-            print(f"Error: {error}")
-            return
-        if binaryinstr:
-            binaryinstructions.append(binaryinstr)
-
-    with open(outputfile, 'w') as file:
-        for binaryinstr in binaryinstructions:
-            file.write(binaryinstr + '\n')
-
-
-if __name__ == "__main__":
-     main()
-    def assembleinstruction(instruction, labels, linenumber):
-    opcodemap = {
-        'jal': '1101111'
     }
+
+    functionmap = {
+        "beq": "000",
+        "bne": "001",
+        "blt": "100",
+        "bge": "101",
+        "bltu": "110",
+        "bgeu": "111"
+    }
+    line = lines[0].strip()
+
+    finalvalue=assembleinstruction(line)
+    with open("output.txt", 'w') as file:
+        for binaryinstr in finalvalue:
+            file.write(binaryinstr)
+elif a[0]=="lui" or a[0]=="aiupc" :
+    registers = {'ra':'00001', 'sp':'00010', 'gp':'00011', 'tp':'00100', 't0':'00101', 't1':'00110', 't2':'00111', 't3':'11100', 't4':'11101', 't5':'11110', 't6':'11111', 's0':'01000', 's1':'01001','s2':'10010', 's3':'10011', 's4':'10100', 's5' : '10101', 's6':'10110', 's7':'10111', 's8':'11000', 's9':'11001', 's10':'11010', 's11':'11011', 'fp':'01000', 'a0':'01010', 'a1':'01011', 'a2':'01100', 'a3':'01101', 'a4':'01110', 'a5':'01111', 'a6':'10000', 'a7':'10001'}
+    opcodemap = {
+    "beq": "1100011",
+    "bne": "1100011",
+    "blt": "1100011",
+    "bge": "1100011",
+    "bltu": "1100011",
+    "bgeu": "1100011",
+    "auipc": "0010111",
+    "lui": "0110111"
+    }
+
+    functionmap = {
+        "beq": "000",
+        "bne": "001",
+        "blt": "100",
+        "bge": "101",
+        "bltu": "110",
+        "bgeu": "111"
+    }
+    line = lines[0].strip()
+    finalvalue=U_type(line)
+    with open("output.txt", 'w') as file:
+        for binaryinstr in finalvalue:
+            file.write(binaryinstr)
+elif a[0]=='jal':
+
+    registers = {'ra':'00001', 'sp':'00010', 'gp':'00011', 'tp':'00100', 't0':'00101', 't1':'00110', 't2':'00111', 't3':'11100', 't4':'11101', 't5':'11110', 't6':'11111', 's0':'01000', 's1':'01001','s2':'10010', 's3':'10011', 's4':'10100', 's5' : '10101', 's6':'10110', 's7':'10111', 's8':'11000', 's9':'11001', 's10':'11010', 's11':'11011', 'fp':'01000', 'a0':'01010', 'a1':'01011', 'a2':'01100', 'a3':'01101', 'a4':'01110', 'a5':'01111', 'a6':'10000', 'a7':'10001'}
+    temp=a[1].split(',')
+    imm = decimal_to_binary(temp[1],21)
+    value = imm[0] + imm[10:20] + imm[9]+ imm[1:9] + registers.get(temp[0]) + "1101111"
+    with open("output.txt", 'w') as file:
+        file.write(value)
     
-    parts = instruction.split()
-    
-    if len(parts) == 0:  # Empty line
-        return None, None
-    elif len(parts) == 1:  # Label
-        labels[parts[0][:-1]] = linenumber  # Remove the ':' from label and store its line number
-        return None, None
-    elif len(parts) == 2:  # Instruction without a label
-        opcode = opcodemap.get(parts[0])
-        if opcode:
-            try:
-                imm = int(parts[1])
-                if imm < -524288 or imm > 1000000:  # Check immediate value range
-                    return None, f"Immediate value out of range on line {linenumber}"
-                binaryinstruction = f"{opcode}{'{0:020b}'.format(imm & 0xFFFFF)}"
-                return binaryinstruction, None
-            except ValueError:
-                return None, f"Invalid immediate value on line {linenumber}"
-        else:
-            return None, f"Unknown instruction on line {linenumber}: {parts[0]}"
-    else:
-        return None, f"Invalid instruction format on line {linenumber}"
-
-def readinputfile(inputfile):
-    try:
-        with open(inputfile, 'r') as f:
-            lines = f.readlines()
-        return lines
-    except FileNotFoundError:
-        print(f"Error: File '{inputfile}' not found.")
-        return []
-
-def writeoutputfile(outputfile, content):
-    try:
-        with open(outputfile, 'w') as f:
-            f.write(content)
-    except FileNotFoundError:
-        print(f"Error: Unable to write to file '{outputfile}'.")
-
-def main():
-    inputfile = input("Enter the input filename: ")
-    outputfile = input("Enter the output filename: ")
-
-    
-    try:
-        with open(inputfile, 'r') as file:
-            lines = file.readlines()
-    except FileNotFoundError:
-        print("Error: Input file not found")
-        return
-    labels = {}
-    binaryinstructions = []
-    errors = []
-
-    for i, line in enumerate(lines, start=1):
-        line = line.strip()
-        binaryinstruction, error = assembleinstruction(line, labels, i)
-        if error:
-            errors.append(error)
-        elif binaryinstruction:
-            binaryinstructions.append(binaryinstruction)
-
-    if errors:
-        writeoutputfile(outputfile, errors[0])  # Write only the first error
-    else:
-        content = '\n'.join(binaryinstructions)
-        writeoutputfile(outputfile, content)
-
-if __name__ == "__main__":
-    main()
-
