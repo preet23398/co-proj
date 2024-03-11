@@ -80,8 +80,8 @@ def Itype(instruction):
     finalList.append(function)
     finalList.append(codeOfdestinationReg)
     finalList.append(opcode)
-    for i in finalList:
-        print(i, end='')
+    #for i in finalList:
+        #print(i, end='')
 
 def Stype(instruction):
 
@@ -115,11 +115,14 @@ def Stype(instruction):
     finalList.append(function)
     finalList.append(immediate_val2)
     finalList.append(opcode)
-    for i in finalList:
-        print(i, end='')
+    #for i in finalList:
+        #print(i, end='')
 
+input_file = input('enter the input file name: ')
+output_file = input('enter the output file name: ')
 
-file = open('test.txt','r')
+file = open(input_file,'r')
+file2 = open(output_file,'w')
 
 for line in file:
     print(line.strip())
@@ -133,13 +136,19 @@ for line in file:
     if whichInstruction == 'sw':
         Stype(instruction)
         print(end='\n')
-        finalList.clear()
     elif whichInstruction == 'lw' or whichInstruction == 'addi' or whichInstruction == 'sltiu' or whichInstruction == 'jalr':
         Itype(instruction)
         print(end='\n')
-        finalList.clear()
     else:
         print('no such instruction exists')
 
-    print(end='\n')
+    for i in finalList:
+        file2.write(i)
+    file2.write('\n')
 
+    
+    finalList.clear()
+
+    print(end='\n')
+file.close()
+file2.close()
